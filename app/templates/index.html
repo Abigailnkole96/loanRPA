@@ -1,0 +1,27 @@
+#A form where users enter their loan details (name, salary, loan amount, etc.). This form is submitted to the Flask app
+
+#Why: HTML pages allow users to interact with the application by submitting loan data and viewing results.
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loan Application</title>
+</head>
+<body>
+    <h1>Loan Application</h1>
+    <form action="/result" method="POST">
+        <label for="salary">Salary:</label>
+        <input type="text" name="salary" required><br>
+        
+        <label for="credit_score">Credit Score:</label>
+        <input type="text" name="credit_score" required><br>
+        
+        <label for="loan_amount">Loan Amount:</label>
+        <input type="text" name="loan_amount" required><br>
+        
+        <button type="submit">Submit</button>
+    </form>
+</body>
+</html>

@@ -1,0 +1,10 @@
+#A CSV file containing mock loan application data (name, salary, credit score, loan amount). This data will be fed into the RPA process for automation.
+#Why: Provides sample input for the RPA process to simulate real-world loan processing.
+
+# Explanation: This sample file contains loan applications with salary, credit score, and loan amount details for each applicant.
+
+
+name,salary,credit_score,loan_amount
+Stark,50000,700,10000
+Targaryen,40000,650,8000
+Lannister,60000,720,12000
