@@ -11,6 +11,8 @@
 # EC2 Instance: This Terraform code provisions an EC2 instance to host the Flask app.
 # S3 Bucket: Creates an S3 bucket to store logs or processed loan application data.
 
+
+
 provider "aws" {
   region = "eu-west-1"
 }
