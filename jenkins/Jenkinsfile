@@ -1,30 +1,46 @@
-// The Jenkinsfile defines the CI/CD pipeline that automates the build, test, and deployment of the app. Jenkins will pull the latest code, run tests, and deploy the Flask app and RPA logic on AWS.
-
-// Why: Jenkins automates the process of deploying the app, allowing continuous integration and continuous delivery. This ensures that any updates to the app are deployed seamlessly.
-
-// Pipeline Stages:
-
-// Build: Pull the latest code and install dependencies.
-// Test: Run unit tests for the machine learning model and Flask app.
-// Deploy: Deploy the app on AWS using terraform apply.
-
 pipeline {
     agent any
     stages {
+        stage('Checkout SCM') {
+            steps {
+                // Checkout the repository
+                checkout scm
+            }
+        }
         stage('Build') {
             steps {
-                sh 'pip install -r app/requirements.txt'
+                // Create a Python virtual environment and install dependencies
+                sh '''
+                    python3 -m venv venv
+                    source venv/bin/activate
+                    pip install --upgrade pip
+                    pip install -r app/requirements.txt
+                '''
             }
         }
         stage('Test') {
             steps {
-                sh 'python -m unittest discover'
+                // Run your tests
+                sh '''
+                    source venv/bin/activate
+                    pytest tests/
+                '''
             }
         }
         stage('Deploy') {
             steps {
-                sh 'terraform -chdir=infrastructure/ apply -auto-approve'
+                // Deployment steps here
+                sh '''
+                    source venv/bin/activate
+                    python app/deploy.py
+                '''
             }
+        }
+    }
+    post {
+        always {
+            // Cleanup: remove the virtual environment after the pipeline runs
+            sh 'rm -rf venv'
         }
     }
 }
