@@ -1,54 +1,45 @@
 pipeline {
     agent any
-    
+
     stages {
         stage('Checkout SCM') {
             steps {
-                // Checkout the Git repository
-                git branch: 'main', 
-                    url: 'https://github.com/yourusername/your-repo.git' // Replace with your repository URL
+                // Checkout the Git repository with specified credentials
+                git branch: 'main',
+                    url: 'https://github.com/Abigailnkole96/loanRPA.git',
+                    credentialsId: 'github-creds' // Use the ID of your credentials
             }
         }
-        
         stage('Build') {
             steps {
                 // Create a Python virtual environment and install dependencies
                 sh '''
-                    # Create a virtual environment named 'venv'
                     python3 -m venv venv
-                    # Activate the virtual environment
                     . venv/bin/activate
-                    # Upgrade pip to the latest version
                     pip install --upgrade pip
-                    # Install project dependencies from requirements.txt
                     pip install -r app/requirements.txt
                 '''
             }
         }
-        
         stage('Test') {
             steps {
-                // Activate the virtual environment and run the test suite
+                // Run your tests
                 sh '''
                     . venv/bin/activate
-                    # Run tests using pytest
                     pytest tests/
                 '''
             }
         }
-        
         stage('Deploy') {
             steps {
-                // Activate the virtual environment and run the deployment script
+                // Deployment steps here
                 sh '''
                     . venv/bin/activate
-                    # Execute the deployment script
                     python app/deploy.py
                 '''
             }
         }
     }
-    
     post {
         always {
             // Cleanup: remove the virtual environment after the pipeline runs
