@@ -1,49 +1,75 @@
 pipeline {
     agent any
-
+    environment {
+        // Specify your git credentials for accessing the GitHub repo
+        GIT_CREDENTIALS = credentials('github-creds')
+    }
     stages {
         stage('Checkout SCM') {
             steps {
-                // Checkout the Git repository with specified credentials
-                git branch: 'main',
-                    url: 'https://github.com/Abigailnkole96/loanRPA.git',
-                    credentialsId: 'github-creds' // Use the ID of your credentials
+                // Checkout the code from the GitHub repository
+                git credentialsId: "${GIT_CREDENTIALS}", url: 'https://github.com/Abigailnkole96/loanRPA.git', branch: 'main'
             }
         }
-        stage('Build') {
+
+        stage('Set up Python Environment') {
             steps {
-                // Create a Python virtual environment and install dependencies
                 sh '''
+                    # Set up a Python virtual environment
                     python3 -m venv venv
                     . venv/bin/activate
+
+                    # Upgrade pip to the latest version
                     pip install --upgrade pip
+
+                    # Install project dependencies from the requirements.txt file
                     pip install -r app/requirements.txt
                 '''
             }
         }
+
+        stage('Build') {
+            steps {
+                // Here you can include any build steps or additional scripts
+                echo "Building the project"
+            }
+        }
+
         stage('Test') {
             steps {
-                // Run your tests
                 sh '''
                     . venv/bin/activate
-                    pytest tests/
+                    # Run your tests or any necessary commands for testing
+                    echo "Running tests"
+                    pytest --disable-warnings
                 '''
             }
         }
+
         stage('Deploy') {
             steps {
-                // Deployment steps here
+                // You can include the deployment step or other actions after build
+                echo "Deploying the application"
+            }
+        }
+
+        stage('Clean Up') {
+            steps {
                 sh '''
-                    . venv/bin/activate
-                    python app/deploy.py
+                    # Deactivate virtual environment and clean up
+                    deactivate
+                    rm -rf venv
                 '''
             }
         }
     }
+
     post {
-        always {
-            // Cleanup: remove the virtual environment after the pipeline runs
-            sh 'rm -rf venv'
+        success {
+            echo 'Pipeline executed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed!'
         }
     }
 }
