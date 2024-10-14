@@ -3,17 +3,30 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                sh 'pip install -r app/requirements.txt'
+                // Create a virtual environment and install dependencies
+                sh '''
+                    python3 -m venv venv
+                    . venv/bin/activate
+                    pip install -r app/requirements.txt
+                '''
             }
         }
         stage('Test') {
             steps {
-                sh 'python -m unittest discover'
+                // Activate the virtual environment and run tests
+                sh '''
+                    . venv/bin/activate
+                    python -m unittest discover
+                '''
             }
         }
         stage('Deploy') {
             steps {
-                sh 'terraform -chdir=infrastructure/ apply -auto-approve'
+                // Activate the virtual environment before deploying
+                sh '''
+                    . venv/bin/activate
+                    terraform -chdir=infrastructure/ apply -auto-approve
+                '''
             }
         }
     }
