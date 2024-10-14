@@ -11,21 +11,56 @@
 # EC2 Instance: This Terraform code provisions an EC2 instance to host the Flask app.
 # S3 Bucket: Creates an S3 bucket to store logs or processed loan application data.
 
-
-
-provider "aws" {
-  region = "eu-west-1"
-}
-
-resource "aws_instance" "app_instance" {
-  ami           = "ami-054a53dca63de757b"
+resource "aws_instance" "flask_app" {
+  ami           = "ami-054a53dca63de757b"  # Example AMI; replace with a suitable one
   instance_type = "t2.micro"
 
+  key_name = aws_key_pair.app_key_pair.key_name
+
   tags = {
-    Name = "LoanRPAApp"
+    Name = "FlaskAppInstance"
   }
 }
 
-resource "aws_s3_bucket" "rpa_bucket" {
-  bucket = "loan-rpa-app-bucket"
+resource "aws_instance" "rpa_bot" {
+  ami           = "ami-054a53dca63de757b"  # Example AMI; replace with a suitable one
+  instance_type = "t2.micro"
+
+  key_name = aws_key_pair.app_key_pair.key_name
+
+  tags = {
+    Name = "RpaBotInstance"
+  }
 }
+
+resource "aws_s3_bucket" "rpa_logs" {
+  bucket = "rpa-logs-bucket" # Ensure this is unique
+  # Add other necessary configurations
+}
+
+output "s3_bucket_id" {
+  value = aws_s3_bucket.rpa_logs.id
+}
+
+
+resource "random_string" "bucket_suffix" {
+  length  = 8
+  special = false
+}
+
+resource "aws_key_pair" "app_key_pair" {
+  key_name   = "app_key_pair"
+  public_key = file("~/.ssh/id_rsa.pub")  # Ensure this path is correct
+}
+
+output "flask_app_instance_id" {
+  value = aws_instance.flask_app.id
+}
+
+output "rpa_bot_instance_id" {
+  value = aws_instance.rpa_bot.id
+}
+
+# output "s3_bucket_id" {
+#   value = aws_s3_bucket.rpa_logs.id
+# }
