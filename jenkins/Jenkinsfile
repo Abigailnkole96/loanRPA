@@ -1,22 +1,28 @@
 pipeline {
     agent any
+
     environment {
-        // Specify your git credentials for accessing the GitHub repo
+        // Specify your Git credentials for accessing the GitHub repo
         GIT_CREDENTIALS = credentials('github-creds')
     }
+
     stages {
         stage('Checkout SCM') {
             steps {
                 // Checkout the code from the GitHub repository
-                git credentialsId: "${GIT_CREDENTIALS}", url: 'https://github.com/Abigailnkole96/loanRPA.git', branch: 'main'
+                git credentialsId: 'github-creds', url: 'https://github.com/Abigailnkole96/loanRPA.git', branch: 'main'
             }
         }
 
         stage('Set up Python Environment') {
             steps {
                 sh '''
-                    # Set up a Python virtual environment
-                    python3 -m venv venv
+                    # Check if virtual environment exists, if not create one
+                    if [ ! -d "venv" ]; then
+                        python3 -m venv venv
+                    fi
+
+                    # Activate virtual environment
                     . venv/bin/activate
 
                     # Upgrade pip to the latest version
@@ -30,7 +36,7 @@ pipeline {
 
         stage('Build') {
             steps {
-                // Here you can include any build steps or additional scripts
+                // Any build steps can be added here
                 echo "Building the project"
             }
         }
@@ -39,8 +45,8 @@ pipeline {
             steps {
                 sh '''
                     . venv/bin/activate
-                    # Run your tests or any necessary commands for testing
                     echo "Running tests"
+                    # Run tests
                     pytest --disable-warnings
                 '''
             }
@@ -48,16 +54,18 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                // You can include the deployment step or other actions after build
                 echo "Deploying the application"
+                // Add deployment steps here
             }
         }
 
         stage('Clean Up') {
             steps {
                 sh '''
-                    # Deactivate virtual environment and clean up
-                    deactivate
+                    # If virtual environment is active, deactivate and clean up
+                    if [ -f "venv/bin/activate" ]; then
+                        . venv/bin/activate && deactivate
+                    fi
                     rm -rf venv
                 '''
             }
@@ -72,4 +80,8 @@ pipeline {
             echo 'Pipeline failed!'
         }
     }
+}
+
+tools {
+    git 'Default'
 }
