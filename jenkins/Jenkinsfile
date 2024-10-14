@@ -1,87 +1,20 @@
 pipeline {
     agent any
-
-    environment {
-        // Specify your Git credentials for accessing the GitHub repo
-        GIT_CREDENTIALS = credentials('github-creds')
-    }
-
     stages {
-        stage('Checkout SCM') {
-            steps {
-                // Checkout the code from the GitHub repository
-                git credentialsId: 'github-creds', url: 'https://github.com/Abigailnkole96/loanRPA.git', branch: 'main'
-            }
-        }
-
-        stage('Set up Python Environment') {
-            steps {
-                sh '''
-                    # Check if virtual environment exists, if not create one
-                    if [ ! -d "venv" ]; then
-                        python3 -m venv venv
-                    fi
-
-                    # Activate virtual environment
-                    . venv/bin/activate
-
-                    # Upgrade pip to the latest version
-                    pip install --upgrade pip
-
-                    # Install project dependencies from the requirements.txt file
-                    pip install -r app/requirements.txt
-                '''
-            }
-        }
-
         stage('Build') {
             steps {
-                // Any build steps can be added here
-                echo "Building the project"
+                sh 'pip install -r app/requirements.txt'
             }
         }
-
         stage('Test') {
             steps {
-                sh '''
-                    . venv/bin/activate
-                    echo "Running tests"
-                    # Run tests
-                    pytest --disable-warnings
-                '''
+                sh 'python -m unittest discover'
             }
         }
-
         stage('Deploy') {
             steps {
-                echo "Deploying the application"
-                // Add deployment steps here
-            }
-        }
-
-        stage('Clean Up') {
-            steps {
-                sh '''
-                    # If virtual environment is active, deactivate and clean up
-                    if [ -f "venv/bin/activate" ]; then
-                        . venv/bin/activate && deactivate
-                    fi
-                    rm -rf venv
-                '''
+                sh 'terraform -chdir=infrastructure/ apply -auto-approve'
             }
         }
     }
-
-    post {
-        success {
-            echo 'Pipeline executed successfully!'
-        }
-        failure {
-            echo 'Pipeline failed!'
-        }
-    }
-}
-
-tools {
-    git 'Default'
 }
