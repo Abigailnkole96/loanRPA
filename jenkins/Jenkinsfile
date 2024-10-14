@@ -15,9 +15,16 @@ pipeline {
             steps {
                 // Activate the virtual environment and run tests
                 sh '''
+                    echo "Activating virtual environment"
                     . venv/bin/activate
-                    echo "Running tests"
-                    python -m unittest discover || { echo "Unittest failed, trying pytest..."; pytest --disable-warnings; }
+                    echo "Running unittests"
+                    python -m unittest discover || { 
+                        echo "Unittest failed, trying pytest..."; 
+                        pytest --disable-warnings || { 
+                            echo "Pytest also failed"; 
+                            exit 1; 
+                        } 
+                    }
                 '''
             }
         }
@@ -25,6 +32,7 @@ pipeline {
             steps {
                 // Activate the virtual environment before deploying
                 sh '''
+                    echo "Activating virtual environment for deployment"
                     . venv/bin/activate
                     terraform -chdir=infrastructure/ apply -auto-approve
                 '''
