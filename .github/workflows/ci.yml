@@ -1,26 +1,35 @@
-name: CI/CD Pipeline
+name: CI
 
 on:
   push:
     branches:
-      - main
+      - main  # Adjust to your primary branch if it's different
 
 jobs:
   terraform:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v1
         with:
-          terraform_version: 1.0.0
+          terraform_version: 1.0.0  # Specify the version you want to use
 
       - name: Terraform Init
+        working-directory: ./infrastructure  # This sets the working directory
         run: terraform init
-        working-directory: ./infrastructure  # Adjust the path here
+
+      - name: Terraform Validate
+        working-directory: ./infrastructure  # Same working directory
+        run: terraform validate
 
       - name: Terraform Plan
+        working-directory: ./infrastructure  # Same working directory
         run: terraform plan
-        working-directory: ./infrastructure  # Adjust the path here
+
+      - name: Terraform Apply
+        working-directory: ./infrastructure  # Same working directory
+        run: terraform apply -auto-approve
