@@ -1,9 +1,9 @@
-name: CI
+name: CI/CD for Terraform
 
 on:
   push:
     branches:
-      - main  # Adjust to your primary branch if it's different
+      - main
 
 jobs:
   terraform:
@@ -19,17 +19,23 @@ jobs:
           terraform_version: 1.0.0  # Specify the version you want to use
 
       - name: Terraform Init
-        working-directory: ./infrastructure  # This sets the working directory
+        working-directory: ./infrastructure
         run: terraform init
 
       - name: Terraform Validate
-        working-directory: ./infrastructure  # Same working directory
+        working-directory: ./infrastructure
+        env:
+          SSH_PUBLIC_KEY: ${{ secrets.SSH_PUBLIC_KEY }}  # Pass the secret as an environment variable
         run: terraform validate
 
       - name: Terraform Plan
-        working-directory: ./infrastructure  # Same working directory
-        run: terraform plan
+        working-directory: ./infrastructure
+        env:
+          SSH_PUBLIC_KEY: ${{ secrets.SSH_PUBLIC_KEY }}  # Pass the secret as an environment variable
+        run: terraform plan -var "ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"  # Pass the variable to Terraform
 
       - name: Terraform Apply
-        working-directory: ./infrastructure  # Same working directory
-        run: terraform apply -auto-approve
+        working-directory: ./infrastructure
+        env:
+          SSH_PUBLIC_KEY: ${{ secrets.SSH_PUBLIC_KEY }}  # Pass the secret as an environment variable
+        run: terraform apply -auto-approve -var "ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"  # Pass the variable to Terraform

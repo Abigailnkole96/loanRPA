@@ -35,3 +35,8 @@ variable "aws_region" {
 #   description = "The path to your SSH public key"
 #   default     = "/home/abigailrestack/.ssh/id_rsa.pub"
 # }
+
+variable "ssh_public_key" {
+  description = "The public key for the EC2 key pair"
+  type        = string
+}
