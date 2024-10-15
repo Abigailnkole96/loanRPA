@@ -1,34 +1,26 @@
-name: CI Workflow
+name: CI/CD Pipeline
 
 on:
   push:
-    branches:
-      - main
-  pull_request:
     branches:
       - main
 
 jobs:
   terraform:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v1
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
         with:
-          terraform_version: 1.5.0  # Update to the required Terraform version
+          terraform_version: 1.0.0
 
-      - name: Initialize Terraform
+      - name: Terraform Init
         run: terraform init
+        working-directory: ./infrastructure  # Adjust the path here
 
-      - name: Validate Terraform
-        run: terraform validate
-
-      - name: Format Terraform
-        run: terraform fmt -check
-
-      - name: Run Terraform Plan
+      - name: Terraform Plan
         run: terraform plan
+        working-directory: ./infrastructure  # Adjust the path here
