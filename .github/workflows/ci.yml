@@ -16,10 +16,11 @@ jobs:
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v2
         with:
-          terraform_version: 1.5.0  # specify your required Terraform version
+          terraform_version: 1.5.0  # Specify your required Terraform version
 
       - name: Terraform Init
         run: terraform init
+        working-directory: loanRPA/infrastructure  # Set the working directory
 
       - name: Terraform Plan
         env:
@@ -27,6 +28,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           SSH_PUBLIC_KEY: ${{ secrets.SSH_PUBLIC_KEY }}
         run: terraform plan -var "ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"
+        working-directory: loanRPA/infrastructure  # Set the working directory
 
       - name: Terraform Apply
         env:
@@ -34,3 +36,4 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           SSH_PUBLIC_KEY: ${{ secrets.SSH_PUBLIC_KEY }}
         run: terraform apply -auto-approve -var "ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"
+        working-directory: loanRPA/infrastructure  # Set the working directory
