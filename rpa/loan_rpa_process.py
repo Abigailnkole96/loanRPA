@@ -15,7 +15,7 @@ import pandas as pd
 import pickle
 
 # Load loan applications data
-loan_data = pd.read_csv('loan_applications.csv')
+loan_data = pd.read_csv('../rpa/loan_applications.csv')
 
 # Load the pre-trained model
 with open('model.pkl', 'rb') as model_file:
