@@ -6,33 +6,52 @@ on:
       - main
 
 jobs:
-  terraform:
+  build-test-deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+
+      - name: Install dependencies
+        run: |
+          python -m venv venv
+          . venv/bin/activate
+          pip install --upgrade pip
+          pip install -r app/requirements.txt
+
+      - name: Run Tests
+        run: |
+          . venv/bin/activate
+          pytest app/tests/
+
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v1
         with:
-          terraform_version: 1.3.0 # Adjust to your required version
+          terraform_version: 1.3.0
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1  # Specify your desired AWS region
+          aws-region: us-east-1
 
-      - name: List files in repository
-        run: ls -la
-
-      - name: List Terraform files
-        run: ls -la infrastructure
-
-      - name: Change directory to infrastructure and run Terraform
+      - name: Apply Terraform
         run: |
           cd infrastructure
           terraform init
           terraform plan -var "ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"
           terraform apply -auto-approve -var "ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"
+          
+      - name: Build Docker Image
+        run: |
+          docker build -t loan_rpa_app .
+
+      - name: Run Docker Container
+        run: |
+          docker run -d -p 5000:5000 loan_rpa_app
