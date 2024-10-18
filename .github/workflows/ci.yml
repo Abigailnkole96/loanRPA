@@ -20,14 +20,15 @@ jobs:
       - name: Install dependencies
         run: |
           python -m venv venv
-          . venv/bin/activate
+          chmod +x venv/bin/*  # Ensure scripts are executable
+          source venv/bin/activate
           pip install --upgrade pip
           pip install -r app/requirements.txt
 
       - name: Run Tests
         run: |
-          . venv/bin/activate
-          pytest app/tests/
+          source venv/bin/activate
+          python -m pytest app/tests/
 
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v1
