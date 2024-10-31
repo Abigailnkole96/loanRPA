@@ -34,5 +34,12 @@ jobs:
         run: |
           cd infrastructure
           terraform init
-          terraform plan -var "ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"
-          terraform apply -auto-approve -var "ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"
+          
+          # Run terraform plan and capture output
+          terraform plan -var "ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" -out=tfplan
+
+          # Optionally display the plan output if needed
+          terraform show tfplan
+
+          # Apply the plan
+          terraform apply -auto-approve tfplan
