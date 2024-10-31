@@ -2,5 +2,6 @@
 # Why: It ensures that all necessary libraries are installed for the app to function.
 
 Flask
+numpy
 scikit-learn
 pandas
