@@ -19,7 +19,6 @@ resource "aws_instance" "flask_app" {
   }
 }
 
-
 resource "aws_instance" "rpa_bot" {
   ami           = "ami-054a53dca63de757b"  # Example AMI; replace with a suitable one
   instance_type = "t2.micro"
