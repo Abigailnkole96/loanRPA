@@ -9,7 +9,7 @@
 # IAM roles to manage access and security policies.
 
 resource "aws_instance" "flask_app" {
-  ami           = "ami-054a53dca63de757b"  # Example AMI; replace with a suitable one
+  ami           = "ami-054a53dca63de757b" # Example AMI; replace with a suitable one
   instance_type = "t2.micro"
 
   key_name = aws_key_pair.app_key_pair.key_name
@@ -20,7 +20,7 @@ resource "aws_instance" "flask_app" {
 }
 
 resource "aws_instance" "rpa_bot" {
-  ami           = "ami-054a53dca63de757b"  # Example AMI; replace with a suitable one
+  ami           = "ami-054a53dca63de757b" # Example AMI; replace with a suitable one
   instance_type = "t2.micro"
 
   key_name = aws_key_pair.app_key_pair.key_name
@@ -32,7 +32,7 @@ resource "aws_instance" "rpa_bot" {
 
 resource "random_string" "bucket_suffix" {
   length  = 8
-  special = false  # Ensures only alphanumeric characters are used
+  special = false # Ensures only alphanumeric characters are used
 }
 
 resource "aws_s3_bucket" "rpa_logs" {
@@ -49,9 +49,9 @@ output "s3_bucket_id" {
 
 resource "aws_key_pair" "app_key_pair" {
   key_name   = "app_key_pair"
-  public_key = var.ssh_public_key  # Reference the variable instead of a file
+  public_key = var.ssh_public_key # Reference the variable instead of a file
 
- lifecycle {
+  lifecycle {
     ignore_changes = [public_key]
   }
 }
