@@ -65,9 +65,6 @@ jobs:
         run: |
           docker push abigailnkole96/loan_rpa_app:latest
 
-
-
-
 # name: CI/CD Pipeline
 
 # on:

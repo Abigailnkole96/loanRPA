@@ -50,6 +50,10 @@ output "s3_bucket_id" {
 resource "aws_key_pair" "app_key_pair" {
   key_name   = "app_key_pair"
   public_key = var.ssh_public_key  # Reference the variable instead of a file
+
+ lifecycle {
+    ignore_changes = [public_key]
+  }
 }
 
 output "flask_app_instance_id" {
