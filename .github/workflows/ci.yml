@@ -24,16 +24,6 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1  # Specify your desired AWS region
 
-      - name: Validate Terraform files
-        run: |
-          cd infrastructure
-          terraform validate
-
-      - name: Debug SSH Public Key Length
-        run: echo "SSH Public Key Length: ${#SSH_PUBLIC_KEY}"
-        env:
-          SSH_PUBLIC_KEY: ${{ secrets.SSH_PUBLIC_KEY }}
-
       - name: List files in repository
         run: ls -la
 
@@ -44,18 +34,16 @@ jobs:
         run: |
           cd infrastructure
           terraform init
-
-          # Enable debug logging
-          export TF_LOG=DEBUG
           
           # Run terraform plan and capture output
-          terraform plan -var "ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" -out=tfplan -input=false
+          terraform plan -var "ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" -out=tfplan
 
           # Optionally display the plan output if needed
           terraform show tfplan
 
           # Apply the plan
           terraform apply -auto-approve tfplan
+
 
 
 
