@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: loan-rpa-app
+spec:
+  replicas: 2  # Adjust the number of replicas as needed
+  selector:
+    matchLabels:
+      app: loan-rpa-app
+  template:
+    metadata:
+      labels:
+        app: loan-rpa-app
+    spec:
+      containers:
+        - name: loan-rpa-app
+          image: abigailnkole96/loan_rpa_app:latest  # Your Docker image
+          ports:
+            - containerPort: 80 # Adjust based on your app's listening port
