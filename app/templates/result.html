@@ -4,15 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Loan Prediction Result</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h1>Loan Prediction Result</h1>
-    <p>Decision: {{ decision }}</p>
-    <p>Reason: {{ reason }}</p>
-    <p>Salary: {{ salary }}</p>
-    <p>Credit Score: {{ credit_score }}</p>
-    <p>Loan Amount: {{ loan_amount }}</p>
-    <p>DTI Ratio: {{ dti_ratio }}</p>
+    <header>
+        <h1>Loan Prediction Result</h1>
+        <div class="bank-name">
+            <span>The Iron Bank</span>
+        </div>
+    </header>
+
+    <div class="result">
+        <p><strong>Decision:</strong> {{ decision }}</p>
+        <p><strong>Reason:</strong> {{ reason }}</p>
+        <p><strong>Salary:</strong> {{ salary }}</p>
+        <p><strong>Credit Score:</strong> {{ credit_score }}</p>
+        <p><strong>Loan Amount:</strong> {{ loan_amount }}</p>
+        <p><strong>DTI Ratio:</strong> {{ dti_ratio }}</p>
+    </div>
+
     <a href="/">Go back</a>
 </body>
 </html>

@@ -4,9 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Loan Application</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h1>Loan Application</h1>
+    <header>
+        <h1>Loan Application</h1>
+        <div class="bank-name">
+            <span>The Iron Bank</span>
+        </div>
+    </header>
+
     <form action="/predict" method="POST">
         <label for="salary">Salary:</label>
         <input type="text" name="salary" required><br>
