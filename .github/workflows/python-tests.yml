@@ -1,0 +1,31 @@
+name: Python Tests
+
+on:
+  push:
+    branches:
+      - feature/python_tests  # Or specify any branch you want the tests to run on
+  pull_request:
+    branches:
+      - feature/python_tests  # Run tests on pull requests to main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest  # Use a GitHub-hosted runner with Ubuntu
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2  # Checkout the repository code
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.12'  # Specify the version of Python you want to use
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt  # Install dependencies from your requirements file
+
+      - name: Run tests with pytest
+        run: |
+          pytest  # Run pytest to execute tests
