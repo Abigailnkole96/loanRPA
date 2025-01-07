@@ -1,7 +1,0 @@
-# Contains the Python libraries required by your Flask app and machine learning model (e.g., Flask, scikit-learn, pandas).
-# Why: It ensures that all necessary libraries are installed for the app to function.
-
-Flask
-numpy
-scikit-learn
-pandas
