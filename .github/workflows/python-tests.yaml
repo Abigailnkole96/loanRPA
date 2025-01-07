@@ -22,7 +22,7 @@ jobs:
           python-version: '3.12'  # Specify the version of Python you want to use
 
       - name: Install distutils
-        run: sudo apt-get install python3-distutils  # Install distutils
+        run: sudo apt-get install python3.12-distutils  # Install distutils for Python 3.12
 
       - name: Install dependencies
         run: |
