@@ -30,10 +30,10 @@ RUN python3 -m venv /venv
 ENV PATH="/venv/bin:$PATH"
 
 # Copy requirements file
-COPY ./app/requirements.txt /app/requirements.txt
+COPY ./requirements.txt /requirements.txt
 
 # Install dependencies from requirements.txt, including numpy
-RUN pip install --no-cache-dir -r /app/requirements.txt
+RUN pip install --no-cache-dir -r /requirements.txt
 
 # Copy the application code
 COPY ./app /app
