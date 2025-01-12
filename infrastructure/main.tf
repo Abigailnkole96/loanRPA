@@ -8,19 +8,55 @@
 # S3 bucket for storing RPA process logs or machine learning models.
 # IAM roles to manage access and security policies.
 
+######################
+# Compute resources
+######################
+
 resource "aws_instance" "flask_app" {
-  ami           = "ami-054a53dca63de757b" # Example AMI; replace with a suitable one
+  ami           = "ami-054a53dca63de757b" # Replace with your desired AMI
   instance_type = "t2.micro"
 
   key_name = aws_key_pair.app_key_pair.key_name
+
+  user_data = <<-EOF
+    #!/bin/bash
+    # Update packages and install dependencies
+    sudo apt-get update -y
+    sudo apt-get install -y python3 python3-pip git
+
+    # Clone your Flask app repository
+    git clone https://github.com/Abigailnkole96/loanRPA.git
+
+    # Navigate to the app folder
+    cd /home/ubuntu/flask-app
+
+    # Install Python dependencies
+    pip3 install -r requirements.txt
+
+    # Run the Flask app
+    python3 app.py > app.log 2>&1 &
+  EOF
 
   tags = {
     Name = "FlaskAppInstance"
   }
 }
 
+
+
+# resource "aws_instance" "flask_app" {
+#   ami           = "ami-054a53dca63de757b" 
+#   instance_type = "t2.micro"
+
+#   key_name = aws_key_pair.app_key_pair.key_name
+
+#   tags = {
+#     Name = "FlaskAppInstance"
+#   }
+# }
+
 resource "aws_instance" "rpa_bot" {
-  ami           = "ami-054a53dca63de757b" # Example AMI; replace with a suitable one
+  ami           = "ami-054a53dca63de757b" 
   instance_type = "t2.micro"
 
   key_name = aws_key_pair.app_key_pair.key_name
@@ -30,6 +66,9 @@ resource "aws_instance" "rpa_bot" {
   }
 }
 
+######################
+# Storage resources
+######################
 resource "random_string" "bucket_suffix" {
   length  = 8
   special = false # Ensures only alphanumeric characters are used
@@ -43,9 +82,6 @@ resource "aws_s3_bucket" "rpa_logs" {
   }
 }
 
-output "s3_bucket_id" {
-  value = aws_s3_bucket.rpa_logs.id
-}
 
 resource "aws_key_pair" "app_key_pair" {
   key_name   = "app_key_pair"
@@ -56,10 +92,23 @@ resource "aws_key_pair" "app_key_pair" {
   }
 }
 
-output "flask_app_instance_id" {
-  value = aws_instance.flask_app.id
-}
 
-output "rpa_bot_instance_id" {
-  value = aws_instance.rpa_bot.id
+######################
+# Permissions
+######################
+
+## policies to allow EC2 instances to access the S3 bucket 
+
+resource "aws_iam_policy" "s3_access" {
+  name = "S3AccessPolicy"
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = ["s3:PutObject", "s3:GetObject"],
+        Resource = ["arn:aws:s3:::rpa-logs-bucket-*/*"]
+      }
+    ]
+  })
 }
