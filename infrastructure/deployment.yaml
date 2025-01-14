@@ -16,4 +16,4 @@ spec:
         - name: loan-rpa-app
           image: abigailnkole96/loan_rpa_app:latest  # Your Docker image
           ports:
-            - containerPort: 80 # Adjust based on your app's listening port
+            - containerPort: 5000  # Adjust based on your app's listening port

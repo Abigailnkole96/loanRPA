@@ -1,143 +1,107 @@
-# Main Terraform configuration file to provision AWS infrastructure.
+####################################
+# AWS Resources to spin up cluster
+####################################
 
-######################
-# Compute resources
-######################
+# # Create a VPC for the EKS Cluster
+# resource "aws_vpc" "eks_vpc" {
+#   cidr_block = "10.0.0.0/16"
 
-# EC2 instance for Flask App
-resource "aws_instance" "flask_app" {
-  ami           = "ami-054a53dca63de757b" # Replace with your desired AMI
-  instance_type = "t2.micro"
+#   tags = {
+#     Name = "eks-vpc"
+#   }
+# }
 
-  key_name                   = aws_key_pair.app_key_pair.key_name
-  iam_instance_profile       = aws_iam_instance_profile.ec2_profile.name
+# # Create subnets
+# resource "aws_subnet" "eks_subnet_a" {
+#   vpc_id            = aws_vpc.eks_vpc.id
+#   cidr_block        = "10.0.1.0/24"
+#   availability_zone = "us-east-1a"
 
-  user_data = <<-EOF
-    #!/bin/bash
-    sudo apt-get update -y
-    sudo apt-get install -y python3 python3-pip git
+#   tags = {
+#     Name = "eks-subnet-a"
+#   }
+# }
 
-    git clone https://github.com/Abigailnkole96/loanRPA.git /home/ubuntu/flask-app
-    cd /home/ubuntu/flask-app
+# resource "aws_subnet" "eks_subnet_b" {
+#   vpc_id            = aws_vpc.eks_vpc.id
+#   cidr_block        = "10.0.2.0/24"
+#   availability_zone = "us-east-1b"
 
-    pip3 install -r requirements.txt
-    python3 app.py > app.log 2>&1 &
-  EOF
+#   tags = {
+#     Name = "eks-subnet-b"
+#   }
+# }
 
-  tags = {
-    Name = "FlaskAppInstance"
-  }
-}
+# # Create an EKS Cluster
+# resource "aws_eks_cluster" "my_eks_cluster" {
+#   name     = "my-eks-cluster"
+#   role_arn = aws_iam_role.eks_cluster_role.arn
+#   vpc_config {
+#     subnet_ids = [
+#       aws_subnet.eks_subnet_a.id,
+#       aws_subnet.eks_subnet_b.id,
+#     ]
+#   }
 
-# EC2 instance for RPA Bot
-resource "aws_instance" "rpa_bot" {
-  ami           = "ami-054a53dca63de757b" # Replace with your desired AMI
-  instance_type = "t2.micro"
+#   depends_on = [aws_iam_role_policy_attachment.eks_cluster_policy]
+# }
 
-  key_name                   = aws_key_pair.app_key_pair.key_name
-  iam_instance_profile       = aws_iam_instance_profile.ec2_profile.name
+# # Create IAM role for EKS Cluster
+# resource "aws_iam_role" "eks_cluster_role" {
+#   name = "eks_cluster_role"
 
-  user_data = <<-EOF
-    #!/bin/bash
-    sudo apt-get update -y
-    sudo apt-get install -y python3 python3-pip git
+#   assume_role_policy = jsonencode({
+#     Version = "2012-10-17"
+#     Statement = [
+#       {
+#         Action = "sts:AssumeRole"
+#         Principal = {
+#           Service = "eks.amazonaws.com"
+#         }
+#         Effect = "Allow"
+#         Sid    = ""
+#       },
+#     ]
+#   })
+# }
 
-    git clone https://github.com/Abigailnkole96/loanRPA.git /home/ubuntu/ml-project
-    cd /home/ubuntu/ml-project
+# # Attach the EKS Cluster policy to the IAM role
+# resource "aws_iam_role_policy_attachment" "eks_cluster_policy" {
+#   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
+#   role       = aws_iam_role.eks_cluster_role.name
+# }
 
-    pip3 install -r requirements.txt
-    python3 ml.py
-  EOF
+# # Create IAM role for EKS Worker Nodes
+# resource "aws_iam_role" "eks_node_role" {
+#   name = "eks_node_role"
 
-  tags = {
-    Name = "RpaBotInstance"
-  }
-}
+#   assume_role_policy = jsonencode({
+#     Version = "2012-10-17"
+#     Statement = [
+#       {
+#         Action = "sts:AssumeRole"
+#         Principal = {
+#           Service = "ec2.amazonaws.com"
+#         }
+#         Effect = "Allow"
+#         Sid    = ""
+#       },
+#     ]
+#   })
+# }
 
-######################
-# Storage resources
-######################
+# # Attach the EKS Node policy to the IAM role
+# resource "aws_iam_role_policy_attachment" "eks_node_policy" {
+#   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
+#   role       = aws_iam_role.eks_node_role.name
+# }
 
-# Generate a random suffix for the S3 bucket
-resource "random_string" "bucket_suffix" {
-  length  = 8
-  special = false
-}
+# resource "aws_iam_role_policy_attachment" "eks_cni_policy" {
+#   policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
+#   role       = aws_iam_role.eks_node_role.name
+# }
 
-# S3 bucket for logs
-resource "aws_s3_bucket" "rpa_logs" {
-  bucket = "rpa-logs-bucket-${random_string.bucket_suffix.result}"
-
-  tags = {
-    Name = "RpaLogsBucket"
-  }
-}
-
-######################
-# SSH Key Pair
-######################
-
-# SSH key pair for EC2 access
-resource "aws_key_pair" "app_key_pair" {
-  key_name   = "app_key_pair"
-  public_key = var.ssh_public_key
-
-  lifecycle {
-    ignore_changes = [public_key]
-  }
-}
-
-######################
-# Permissions
-######################
-
-# IAM policy to allow EC2 instances to access S3 bucket
-resource "aws_iam_policy" "s3_access_policy" {
-  name   = "S3AccessPolicy"
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Effect = "Allow",
-        Action = [
-          "s3:GetObject",
-          "s3:PutObject",
-          "s3:ListBucket"
-        ],
-        Resource = [
-          "arn:aws:s3:::${aws_s3_bucket.rpa_logs.id}",
-          "arn:aws:s3:::${aws_s3_bucket.rpa_logs.id}/*"
-        ]
-      }
-    ]
-  })
-}
-
-# IAM role for EC2 instances
-resource "aws_iam_role" "ec2_role" {
-  name               = "ec2_s3_access_role"
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Effect = "Allow",
-        Principal = {
-          Service = "ec2.amazonaws.com"
-        },
-        Action = "sts:AssumeRole"
-      }
-    ]
-  })
-}
-
-# Attach the policy to the role
-resource "aws_iam_role_policy_attachment" "ec2_s3_policy_attach" {
-  role       = aws_iam_role.ec2_role.name
-  policy_arn = aws_iam_policy.s3_access_policy.arn
-}
-
-# Instance profile for EC2 role
-resource "aws_iam_instance_profile" "ec2_profile" {
-  name = "ec2_instance_profile"
-  role = aws_iam_role.ec2_role.name
-}
+# # Output the cluster name
+# output "cluster_name" {
+#   value = aws_eks_cluster.my_eks_cluster.name
+# }
