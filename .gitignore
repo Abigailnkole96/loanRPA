@@ -1,1 +1,8 @@
+# Ignore Terraform files
 infrastructure/.terraform/providers/
+.terraform
+.terraform.lock.hcl
+.terraform.tfstate.backup
+
+# Ignore virtual environment folder
+venv/
