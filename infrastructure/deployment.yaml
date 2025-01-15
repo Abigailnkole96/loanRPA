@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: loan-rpa-app
 spec:
-  replicas: 2  # Adjust the number of replicas as needed
+  replicas: 2  # Adjustable number of replicas as needed
   selector:
     matchLabels:
       app: loan-rpa-app
@@ -14,6 +14,6 @@ spec:
     spec:
       containers:
         - name: loan-rpa-app
-          image: abigailnkole96/loan_rpa_app:latest  # Your Docker image
+          image: abigailnkole96/loan_rpa_app:latest
           ports:
-            - containerPort: 5000  # Adjust based on your app's listening port
+            - containerPort: 5000  # Adjust based on app's listening port
