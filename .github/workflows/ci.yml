@@ -21,7 +21,7 @@ jobs:
 
       - name: Update kubeconfig
         run: |
-          aws eks update-kubeconfig --name LoanAppCluster --region us-east-1  # Adjust to your AWS region
+          aws eks update-kubeconfig --name LoanAppCluster --region eu-west-1  # Adjust to your AWS region
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v1
