@@ -6,47 +6,8 @@ on:
       - main
 
 jobs:
-  terraform:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v1
-        with:
-          terraform_version: 1.3.0  # Adjust to your required version
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1  # Specify your desired AWS region
-
-      - name: List files in repository
-        run: ls -la
-
-      - name: List Terraform files
-        run: ls -la infrastructure
-
-      - name: Change directory to infrastructure and run Terraform
-        run: |
-          cd infrastructure
-          terraform init
-          
-          # Run terraform plan and capture output
-          terraform plan -var "ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" -out=tfplan
-
-          # Optionally display the plan output if needed
-          terraform show tfplan
-
-          # Apply the plan
-          terraform apply -auto-approve tfplan
-
   docker:
     runs-on: ubuntu-latest
-    needs: terraform  # Ensure the terraform job is completed
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -56,106 +17,29 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-      
-      - name: Build Docker Image
+
+      - name: Pull Docker Image
         run: |
-          docker build -t abigailnkole96/loan_rpa_app:latest .
+          docker pull abigailnkole96/loan_rpa_app:latest
 
       - name: Push Docker Image
         run: |
           docker push abigailnkole96/loan_rpa_app:latest
 
-          docker push abigailnkole96/loan_rpa_app:latest
+  deploy:
+    runs-on: ubuntu-latest
+    needs: docker  # Ensure the docker job is completed
+    steps:
+      - name: Configure kubectl
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}  # Base64 encoded kubeconfig
+        run: |
+          mkdir -p $HOME/.kube
+          echo "$KUBE_CONFIG_DATA" | base64 --decode > $HOME/.kube/config
 
-# name: CI/CD Pipeline
+      - name: Deploy to EKS
+        run: |
+          kubectl apply -f loanRPA/infrastructure/deployment.yaml
+          kubectl apply -f loanRPA/infrastructure/service.yaml
 
-# on:
-#   push:
-#     branches:
-#       - main
-
-# jobs:
-#   terraform:
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Checkout code
-#         uses: actions/checkout@v2
-
-#       - name: Set up Terraform
-#         uses: hashicorp/setup-terraform@v1
-#         with:
-#           terraform_version: 1.3.0 # Adjust to your required version
-
-#       - name: Configure AWS Credentials
-#         uses: aws-actions/configure-aws-credentials@v1
-#         with:
-#           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-#           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-#           aws-region: us-east-1  # Specify your desired AWS region
-
-#       - name: List files in repository
-#         run: ls -la
-
-#       - name: List Terraform files
-#         run: ls -la infrastructure
-
-#       - name: Change directory to infrastructure and run Terraform
-#         run: |
-#           cd infrastructure
-#           terraform init
           
-#           # Run terraform plan and capture output
-#           terraform plan -var "ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" -out=tfplan
-
-#           # Optionally display the plan output if needed
-#           terraform show tfplan
-
-#           # Apply the plan
-#           terraform apply -auto-approve tfplan
-
-
-# name: CI/CD Pipeline
-
-# on:
-#   push:
-#     branches:
-#       - main
-
-# jobs:
-#   terraform:
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Checkout code
-#         uses: actions/checkout@v2
-
-#       - name: Set up Terraform
-#         uses: hashicorp/setup-terraform@v1
-#         with:
-#           terraform_version: 1.3.0 # Adjust to your required version
-
-#       - name: Configure AWS Credentials
-#         uses: aws-actions/configure-aws-credentials@v1
-#         with:
-#           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-#           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-#           aws-region: us-east-1  # Specify your desired AWS region
-
-#       - name: List files in repository
-#         run: ls -la
-
-#       - name: List Terraform files
-#         run: ls -la infrastructure
-
-#       - name: Change directory to infrastructure and run Terraform
-#         run: |
-#           cd infrastructure
-#           terraform init
-          
-#           # Run terraform plan and capture output
-#           terraform plan -var "ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" -out=tfplan
-
-#           # Optionally display the plan output if needed
-#           terraform show tfplan
-
-#           # Apply the plan
-#           terraform apply -auto-approve tfplan
