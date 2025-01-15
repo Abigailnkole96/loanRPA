@@ -39,7 +39,7 @@ jobs:
 
       - name: Deploy to EKS
         run: |
-          kubectl apply -f loanRPA/infrastructure/deployment.yaml
-          kubectl apply -f loanRPA/infrastructure/service.yaml
+          kubectl apply -f infrastructure/deployment.yaml
+          kubectl apply -f infrastructure/service.yaml
 
           
